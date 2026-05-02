@@ -45,11 +45,29 @@ Loguru's record dict is projected into Better Stack's preferred shape:
 | `dt`         | `record.time` as RFC 3339 UTC                |
 | `level`      | `record.level.name`                          |
 | `message`    | `record.message`                             |
-| `source.*`   | `name`, `function`, `module`, `line`, `process`, `thread` |
+| `source.*`   | `name`, `function`, `module`, `line`, `file`, `process`, `thread` |
 | `context.*`  | everything from `logger.bind(...)` / `logger.contextualize(...)` |
 | `exception`  | the formatted traceback when present         |
 
-So `logger.bind(user_id=42).info("login")` shows up in Better Stack with `user_id=42` searchable as a structured field.
+So `logger.bind(user_id=42).info("login")` shows up in Better Stack with `user_id=42` searchable as a structured field. Example payload:
+
+```json
+{
+  "dt": "2026-04-29T12:34:56.789012+00:00",
+  "level": "WARNING",
+  "message": "slow checkout",
+  "source": {
+    "name": "billing.checkout",
+    "function": "submit",
+    "module": "checkout",
+    "line": 142,
+    "file": "checkout.py",
+    "process": { "id": 4711, "name": "MainProcess" },
+    "thread": { "id": 140523, "name": "MainThread" }
+  },
+  "context": { "user_id": 42, "route": "/checkout" }
+}
+```
 
 ## Configuration
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "loguru-betterstack"
-version = "0.1.0"
+version = "0.1.1"
 description = "Ship Loguru logs to Better Stack (Logtail) over HTTP, batched and non-blocking."
 readme = "README.md"
 license = { text = "MIT" }
@@ -33,6 +33,9 @@ dev = ["pytest>=7", "ruff>=0.4"]
 [project.urls]
 Homepage = "https://github.com/coffeenjoyer17/loguru-betterstack"
 Issues = "https://github.com/coffeenjoyer17/loguru-betterstack/issues"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]

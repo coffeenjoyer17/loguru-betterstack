@@ -20,8 +20,11 @@ from loguru_betterstack import BetterStackSink
 
 
 class _CapturingHandler(BaseHTTPRequestHandler):
-    received: list[dict] = []
-    headers_seen: list[dict] = []
+    # Class attrs hold the records seen across requests for the test fixture.
+    # Untyped on purpose: PEP 585 builtin generics aren't usable at class body
+    # level on Python 3.9 even with `from __future__ import annotations`.
+    received = []
+    headers_seen = []
 
     def do_POST(self) -> None:  # noqa: N802 (BaseHTTPRequestHandler API)
         length = int(self.headers.get("Content-Length", "0"))
@@ -143,6 +146,32 @@ def test_sink_preserves_bound_context(http_server):
     record = _CapturingHandler.received[0][0]
     assert record["context"] == {"user_id": 42, "route": "/x"}
     assert record["level"] == "WARNING"
+
+
+def test_source_metadata_includes_thread_and_process(http_server):
+    sink = BetterStackSink(
+        source_token="tok",
+        host=http_server,
+        batch_size=1,
+        flush_interval=0.2,
+    )
+    logger.remove()
+    logger.add(sink, level="INFO")
+
+    logger.info("with source")
+
+    assert _wait_until(lambda: len(_CapturingHandler.received) >= 1)
+    sink.close(timeout=2.0)
+
+    record = _CapturingHandler.received[0][0]
+    source = record.get("source", {})
+    assert "function" in source
+    assert "module" in source
+    assert "line" in source
+    assert isinstance(source.get("thread"), dict)
+    assert "id" in source["thread"] and "name" in source["thread"]
+    assert isinstance(source.get("process"), dict)
+    assert "id" in source["process"] and "name" in source["process"]
 
 
 def test_close_drains_pending_records(http_server):

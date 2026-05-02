@@ -230,10 +230,19 @@ def _flatten_record(record: dict[str, Any]) -> dict[str, Any]:
     }
 
     source: dict[str, Any] = {}
-    for key in ("name", "function", "module", "line", "process", "thread"):
+    for key in ("name", "function", "module", "line"):
         value = record.get(key)
         if value is not None:
             source[key] = _stringify(value)
+    proc = record.get("process")
+    if proc is not None:
+        source["process"] = _id_name(proc)
+    thread = record.get("thread")
+    if thread is not None:
+        source["thread"] = _id_name(thread)
+    file_obj = record.get("file")
+    if file_obj is not None:
+        source["file"] = getattr(file_obj, "name", _stringify(file_obj))
     if source:
         payload["source"] = source
 
@@ -267,13 +276,21 @@ def _is_loguru_level(level: Any) -> bool:
 def _stringify(value: Any) -> str:
     if isinstance(value, str):
         return value
-    obj = getattr(value, "__dict__", None)
-    if obj:
-        try:
-            return repr(value)
-        except Exception:
-            return str(value)
     return str(value)
+
+
+def _id_name(value: Any) -> dict[str, Any]:
+    """Project a Loguru ``RecordThread`` / ``RecordProcess`` into ``{id, name}``."""
+    out: dict[str, Any] = {}
+    pid = getattr(value, "id", None)
+    if pid is not None:
+        out["id"] = pid
+    pname = getattr(value, "name", None)
+    if pname is not None:
+        out["name"] = pname
+    if not out:
+        return {"value": _stringify(value)}
+    return out
 
 
 def _safe_value(value: Any) -> Any:
