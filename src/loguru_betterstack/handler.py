@@ -98,9 +98,7 @@ class BetterStackSink:
         self._queue: queue.Queue[dict[str, Any]] = queue.Queue(maxsize=self._max_queue)
         self._stop = threading.Event()
         self._dropped = 0
-        self._worker = threading.Thread(
-            target=self._run, name="loguru-betterstack", daemon=True
-        )
+        self._worker = threading.Thread(target=self._run, name="loguru-betterstack", daemon=True)
         self._worker.start()
 
     # -- Loguru sink interface ------------------------------------------------
@@ -168,9 +166,7 @@ class BetterStackSink:
                 pass
 
             now = time.monotonic()
-            should_flush = batch and (
-                len(batch) >= self._batch_size or now >= next_flush
-            )
+            should_flush = batch and (len(batch) >= self._batch_size or now >= next_flush)
             if should_flush:
                 self._send(batch)
                 batch = []
@@ -196,20 +192,17 @@ class BetterStackSink:
                 resp.read()
         except urllib.error.HTTPError as exc:
             print(
-                f"[loguru-betterstack] HTTP {exc.code}: {exc.reason} for "
-                f"{len(batch)} record(s)",
+                f"[loguru-betterstack] HTTP {exc.code}: {exc.reason} for {len(batch)} record(s)",
                 file=sys.stderr,
             )
         except urllib.error.URLError as exc:
             print(
-                f"[loguru-betterstack] network error: {exc.reason} for "
-                f"{len(batch)} record(s)",
+                f"[loguru-betterstack] network error: {exc.reason} for {len(batch)} record(s)",
                 file=sys.stderr,
             )
         except Exception as exc:  # pragma: no cover - last-resort guard
             print(
-                f"[loguru-betterstack] unexpected error: {exc!r} for "
-                f"{len(batch)} record(s)",
+                f"[loguru-betterstack] unexpected error: {exc!r} for {len(batch)} record(s)",
                 file=sys.stderr,
             )
 

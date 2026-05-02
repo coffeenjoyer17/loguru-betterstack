@@ -178,8 +178,8 @@ def test_close_drains_pending_records(http_server):
     sink = BetterStackSink(
         source_token="tok",
         host=http_server,
-        batch_size=100,        # so size never triggers a flush
-        flush_interval=10.0,   # so time never triggers a flush
+        batch_size=100,  # so size never triggers a flush
+        flush_interval=10.0,  # so time never triggers a flush
     )
     logger.remove()
     logger.add(sink, level="INFO")
