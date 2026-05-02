@@ -111,3 +111,7 @@ asyncio.run(main())
 ## License
 
 MIT. See `LICENSE`.
+
+---
+
+How this came together in one evening with Claude Code: see [POSTMORTEM.md](POSTMORTEM.md).
